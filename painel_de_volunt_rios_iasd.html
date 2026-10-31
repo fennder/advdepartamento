@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Voluntários - IASD Plano Diretor Sul</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        iasd: {
+                            blue: '#004B87',
+                            dark: '#002B49',
+                            gold: '#D4AF37',
+                            light: '#0066B3',
+                            accent: '#F39200'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="h-full font-sans text-slate-800 antialiased flex flex-col">
+
+    <!-- Header / Navbar -->
+    <header class="bg-iasd-dark text-white shadow-md sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-iasd-blue p-2.5 rounded-xl border border-white/10 shadow-inner">
+                        <i data-lucide="church" class="w-7 h-7 text-white"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-semibold uppercase tracking-wider text-iasd-gold bg-iasd-blue/50 px-2 py-0.5 rounded">IASD Plano Diretor Sul</span>
+                        </div>
+                        <h1 class="text-xl sm:text-2xl font-bold tracking-tight">Competência & Compromisso</h1>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-3">
+                    <button onclick="exportToCSV()" class="flex items-center space-x-2 bg-iasd-blue hover:bg-iasd-light text-white px-4 py-2 rounded-lg transition-colors text-sm font-medium shadow-sm border border-white/10">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        <span>Exportar CSV</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <!-- Stat Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <!-- Total Voluntários -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between hover:shadow-md transition-shadow">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Voluntários</p>
+                    <p class="text-3xl font-bold text-slate-900 mt-1" id="stat-total">18</p>
+                    <p class="text-xs text-emerald-600 mt-1 font-medium flex items-center gap-1">
+                        <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Formulários Registrados
+                    </p>
+                </div>
+                <div class="p-4 bg-blue-50 text-iasd-blue rounded-xl">
+                    <i data-lucide="users" class="w-7 h-7"></i>
+                </div>
+            </div>
+
+            <!-- Dispostos a Liderar -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between hover:shadow-md transition-shadow">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Liderança / Ambas</p>
+                    <p class="text-3xl font-bold text-slate-900 mt-1" id="stat-lideres">6</p>
+                    <p class="text-xs text-slate-500 mt-1 font-medium" id="stat-lideres-pct">33.3% do total</p>
+                </div>
+                <div class="p-4 bg-amber-50 text-amber-600 rounded-xl">
+                    <i data-lucide="crown" class="w-7 h-7"></i>
+                </div>
+            </div>
+
+            <!-- Apenas Ajudando -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between hover:shadow-md transition-shadow">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Apenas Ajudar</p>
+                    <p class="text-3xl font-bold text-slate-900 mt-1" id="stat-ajuda">10</p>
+                    <p class="text-xs text-slate-500 mt-1 font-medium" id="stat-ajuda-pct">55.6% do total</p>
+                </div>
+                <div class="p-4 bg-indigo-50 text-indigo-600 rounded-xl">
+                    <i data-lucide="hand-heart" class="w-7 h-7"></i>
+                </div>
+            </div>
+
+            <!-- Total Escolhas Ministérios -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between hover:shadow-md transition-shadow">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Aplicações</p>
+                    <p class="text-3xl font-bold text-slate-900 mt-1" id="stat-interesses">45</p>
+                    <p class="text-xs text-slate-500 mt-1 font-medium">Méd. 2.5 por pessoa</p>
+                </div>
+                <div class="p-4 bg-emerald-50 text-emerald-600 rounded-xl">
+                    <i data-lucide="layers" class="w-7 h-7"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Bar Chart: Ministries Distribution -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900">Interesse por Ministério</h2>
+                            <p class="text-xs text-slate-500">Distribuição total de opções selecionadas pelos voluntários</p>
+                        </div>
+                        <span class="text-xs bg-slate-100 text-slate-600 font-medium px-2.5 py-1 rounded-full border border-slate-200">Visão Geral</span>
+                    </div>
+                    <div class="h-72 relative">
+                        <canvas id="ministryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Doughnut Chart: Involvement Profile -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200/80 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900">Tipo de Envolvimento</h2>
+                            <p class="text-xs text-slate-500">Perfil de atuação desejado pelos membros</p>
+                        </div>
+                    </div>
+                    <div class="h-64 relative flex items-center justify-center">
+                        <canvas id="roleChart"></canvas>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 space-y-1.5">
+                    <div class="flex justify-between items-center">
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> Liderar & Ajudar</span>
+                        <span class="font-semibold text-slate-700" id="legend-both">4</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-iasd-blue inline-block"></span> Apenas Liderar</span>
+                        <span class="font-semibold text-slate-700" id="legend-lead">2</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-indigo-400 inline-block"></span> Apenas Ajudar</span>
+                        <span class="font-semibold text-slate-700" id="legend-help">10</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table Section -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+            <!-- Table Filters Header -->
+            <div class="p-6 border-b border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">Lista de Voluntários</h2>
+                    <p class="text-xs text-slate-500">Gerencie, filtre e visualize os dados extraídos das fichas</p>
+                </div>
+                <div class="flex flex-col sm:flex-row items-center gap-3">
+                    <!-- Search Input -->
+                    <div class="relative w-full sm:w-64">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="searchInput" placeholder="Buscar por nome ou fone..." 
+                               class="w-full pl-9 pr-4 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-iasd-blue focus:border-transparent">
+                    </div>
+                    
+                    <!-- Ministry Filter -->
+                    <div class="w-full sm:w-auto">
+                        <select id="ministryFilter" class="w-full py-2 px-3 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-iasd-blue">
+                            <option value="">Todos os Ministérios</option>
+                        </select>
+                    </div>
+
+                    <!-- Role Filter -->
+                    <div class="w-full sm:w-auto">
+                        <select id="roleFilter" class="w-full py-2 px-3 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-iasd-blue">
+                            <option value="">Todos os Perfis</option>
+                            <option value="Liderar">Liderar (ou Ambos)</option>
+                            <option value="Ajudar">Ajudar</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Responsive Table -->
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                            <th class="px-6 py-4">Voluntário</th>
+                            <th class="px-6 py-4">Contato</th>
+                            <th class="px-6 py-4">Perfil de Atuação</th>
+                            <th class="px-6 py-4">Ministérios Selecionados</th>
+                            <th class="px-6 py-4 text-right">Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="volunteersTableBody" class="divide-y divide-slate-200 text-sm">
+                        <!-- Dynamic Rows -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table Footer -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+                <span id="showingCount">Exibindo 18 de 18 registros</span>
+                <button onclick="exportToCSV()" class="md:hidden text-iasd-blue font-semibold hover:underline flex items-center gap-1">
+                    <i data-lucide="download" class="w-3.5 h-3.5"></i> Exportar Dados
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Details Modal -->
+    <div id="volunteerModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-lg overflow-hidden transform transition-all">
+            <!-- Modal Header -->
+            <div class="bg-iasd-dark text-white p-6 relative">
+                <button onclick="closeModal()" class="absolute top-5 right-5 text-slate-300 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-full bg-iasd-blue flex items-center justify-center text-xl font-bold text-white border-2 border-iasd-gold" id="modalInitials">
+                        CC
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-white" id="modalName">Cristopher Campos</h3>
+                        <p class="text-xs text-slate-300 flex items-center gap-1 mt-0.5" id="modalStatus">
+                            <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-400"></i> Membro Batizado IASD PDS
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-6 space-y-5">
+                <div>
+                    <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Informações de Contato</h4>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 flex items-center space-x-3">
+                        <i data-lucide="phone" class="w-4 h-4 text-iasd-blue"></i>
+                        <span class="text-sm font-medium text-slate-700" id="modalPhone">(63) 99165-5571</span>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Disposição para Serviço</h4>
+                    <div id="modalRoles" class="flex flex-wrap gap-2">
+                        <!-- Dynamic Role Badges -->
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Ministérios de Interesse (<span id="modalMinCount">0</span>)</h4>
+                    <div id="modalMinistries" class="flex flex-wrap gap-2 max-h-48 overflow-y-auto custom-scrollbar p-1">
+                        <!-- Dynamic Ministry Badges -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="bg-slate-50 px-6 py-4 border-t border-slate-200 flex justify-end">
+                <button onclick="closeModal()" class="px-4 py-2 bg-slate-200 text-slate-700 hover:bg-slate-300 rounded-lg text-sm font-semibold transition-colors">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Script & App Logic -->
+    <script>
+        // Extraction of raw data from PDFs
+        const volunteersData = [
+            {
+                id: 1,
+                name: "Cristopher Campos",
+                phone: "63991655571",
+                membership: "IASD Plano Diretor Sul",
+                lead: true,
+                help: true,
+                ministries: ["Ancionato", "Ministério da Música", "Ministério Pessoal"]
+            },
+            {
+                id: 2,
+                name: "Ana Costa",
+                phone: "63 99116-8050",
+                membership: "IASD Plano Diretor Sul",
+                lead: true,
+                help: false,
+                ministries: ["Ministério da Família", "Ministério da Música"]
+            },
+            {
+                id: 3,
+                name: "Duralucia Jalkad de A. Reis",
+                phone: "(63) 98502-19..",
+                membership: "IASD Plano Diretor Sul",
+                lead: false,
+                help: true,
+                ministries: ["Escola Sabatina", "Ministério Pessoal", "Pequenos Grupos"]
+            },
+            {
+                id: 4,
+                name: "Lisandro Ferraz",
+                phone: "63 9805-0495",
+                membership: "IASD Plano Diretor Sul",
+                lead: false,
+                help: false, // Não marcou opção explícita no fim
+                ministries: ["Ancionato", "Áudio Visual", "Diaconato", "Ministério da Recepção", "Pequenos Grupos"]
+            },
+            {
+                id: 5,
+                name: "Bruna Doc",
+                phone: "63 98112-4267",
+                membership: "IASD Plano Diretor Sul",
+                lead: true,
+                help: true,
+                ministries: [
+                    "Ação Solidária Adventista - ASA", 
+                    "Comunicação", 
+                    "Liberdade Religiosa", 
+                    "Ministério Adventista das Possibilidades", 
+                    "Ministério da Família", 
+                    "Ministério da Mulher", 
+                    "Ministério da Recepção", 
+                    "Patrimônio", 
+                    "Secretaria", 
+                    "Tesouraria"
+                ]
+            },
+            {
+                id: 6,
+                name: "Simone Vicina dos Santos",
+                phone: "63 98428-9483",
+                membership: "IASD Plano Diretor Sul",
+                lead: false,
+                help: true,
+                ministries: ["Ministério da Criança", "Secretaria"]
+            },
+            {
+                id: 7,
+                name: "Marcella",
+                phone: "63 98418-0317",
+                membership: "IASD Plano Diretor Sul",
+                lead: false,
+                help: true,
+                ministries: ["Ministério da Recepção", "Ministério dos Jovens Adventistas"]
+            },
+            {
+                id: 8,
+                name: "Marcon Freclo Gama",
+                phone: "98416-5449",
+                membership: "IASD Plano Diretor Sul",
+                lead: false,
+                help: true,
+                ministries: ["Diaconato", "Escola Sabatina", "Ministério Pessoal", "Pequenos Grupos"]
+            },
+            {
+                id: 9,
+                name: "Renata Godoy Cruz",
+                phone: "63 99263-7282",
+                membership: "IASD Plano Diretor Sul",
+                lead: false,
+                help: true,
+                ministries: ["Ministério da Mulher"]
+            },
+            {
+                id: 10,
+                name: "Edir P. Santos",
+                phone: "61 98906-7817",
+                membership: "IASD Plano Diretor Sul",
+                lead: true,
+                help: false,
+                ministries: ["Ministério dos Homens"]
+            },
+            {
+                id: 11,
+                name: "Yleeson F. Ferraz",
+                phone: "63 99969-3883",
+                membership: "IASD Plano Diretor Sul",
+                lead: false,
+                help: true,
+                ministries: ["Comunicação", "Ministério da Música"]
+            },
+            {
+                id: 12,
+                name: "Geraldo Olio Eils",
+                phone: "99224-9733",
+                membership: "IASD Plano Diretor Sul",
+                lead: true,
+                help: true,
+                ministries: ["Áudio Visual", "Comunicação", "Escola Sabatina", "Ministério da Recepção", "Ministério dos Adolescentes", "Ministério Pessoal"]
+            },
+            {
+                id: 13,
+                name: "Aquxona Menols Pereira",
+                phone: "63 99972-4293",
+                membership: "IASD Plano Diretor Sul",
+                lead: false,
+                help: true,
+                ministries: ["Ação Solidária Adventista - ASA", "Ministério dos Jovens Adventistas", "Pequenos Grupos"]
+            },
+            {
+                id: 14,
+                name: "Fellipe da Silva Goulart",
+                phone: "(63) 99246-4563",
+                membership: "IASD Plano Diretor Sul",
+                lead: false,
+                help: true,
+                ministries: ["Ação Solidária Adventista - ASA", "Ministério dos Jovens Adventistas", "Pequenos Grupos"]
+            },
+            {
+                id: 15,
+                name: "Rosinha Ribeiro de Sa",
+                phone: "Não informado",
+                membership: "IASD Plano Diretor Sul",
+                lead: false,
+                help: true,
+                ministries: ["Ação Solidária Adventista - ASA", "Tesouraria"]
+            },
+            {
+                id: 16,
+                name: "Schellen R. Olis",
+                phone: "Não informado",
+                membership: "IASD Plano Diretor Sul",
+                lead: false,
+                help: false,
+                ministries: ["Ministério da Família", "Ministério da Mulher"]
+            },
+            {
+                id: 17,
+                name: "Isadora Matos Oliveira",
+                phone: "(63) 99222-0713",
+                membership: "IASD Plano Diretor Sul",
+                lead: true,
+                help: true,
+                ministries: ["Ação Solidária Adventista - ASA", "Comunicação", "Ministério da Música", "Ministério da Recepção", "Ministério dos Jovens Adventistas"]
+            },
+            {
+                id: 18,
+                name: "Isabela Matos Oliveira",
+                phone: "63 99222-2714",
+                membership: "IASD Plano Diretor Sul",
+                lead: false,
+                help: true,
+                ministries: ["Comunicação", "Escola Sabatina", "Ministério da Música", "Ministério da Recepção", "Ministério dos Jovens Adventistas"]
+            }
+        ];
+
+        // Global Charts Variables
+        let ministryChart = null;
+        let roleChart = null;
+
+        // Initialize UI
+        document.addEventListener("DOMContentLoaded", () => {
+            lucide.createIcons();
+            populateFilters();
+            renderTable(volunteersData);
+            updateStats();
+            initCharts();
+
+            // Setup Search & Filters Listeners
+            document.getElementById('searchInput').addEventListener('input', filterData);
+            document.getElementById('ministryFilter').addEventListener('change', filterData);
+            document.getElementById('roleFilter').addEventListener('change', filterData);
+        });
+
+        // Helper: Get All Unique Ministries
+        function getUniqueMinistries() {
+            const set = new Set();
+            volunteersData.forEach(v => v.ministries.forEach(m => set.add(m)));
+            return Array.from(set).sort();
+        }
+
+        // Populate Select Filters
+        function populateFilters() {
+            const select = document.getElementById('ministryFilter');
+            const sortedMinistries = getUniqueMinistries();
+            sortedMinistries.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = m;
+                select.appendChild(opt);
+            });
+        }
+
+        // Update Stat Cards
+        function updateStats() {
+            const total = volunteersData.length;
+            const lideres = volunteersData.filter(v => v.lead).length;
+            const apenasAjuda = volunteersData.filter(v => v.help && !v.lead).length;
+            
+            let totalInteresses = 0;
+            volunteersData.forEach(v => totalInteresses += v.ministries.length);
+
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-lideres').innerText = lideres;
+            document.getElementById('stat-lideres-pct').innerText = `${((lideres / total) * 100).toFixed(1)}% dispostos a liderar`;
+            
+            document.getElementById('stat-ajuda').innerText = apenasAjuda;
+            document.getElementById('stat-ajuda-pct').innerText = `${((apenasAjuda / total) * 100).toFixed(1)}% apenas ajuda`;
+
+            document.getElementById('stat-interesses').innerText = totalInteresses;
+
+            // Chart Legends
+            const bothCount = volunteersData.filter(v => v.lead && v.help).length;
+            const onlyLeadCount = volunteersData.filter(v => v.lead && !v.help).length;
+            const onlyHelpCount = volunteersData.filter(v => !v.lead && v.help).length;
+
+            document.getElementById('legend-both').innerText = bothCount;
+            document.getElementById('legend-lead').innerText = onlyLeadCount;
+            document.getElementById('legend-help').innerText = onlyHelpCount;
+        }
+
+        // Render Table Rows
+        function renderTable(data) {
+            const tbody = document.getElementById('volunteersTableBody');
+            tbody.innerHTML = '';
+
+            if(data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-slate-400">
+                            Nenhum voluntário encontrado para os filtros selecionados.
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('showingCount').innerText = `Exibindo 0 de ${volunteersData.length} registros`;
+                return;
+            }
+
+            data.forEach(v => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50/80 transition-colors";
+
+                // Role Badges
+                let roleBadges = '';
+                if(v.lead && v.help) {
+                    roleBadges = `<span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-md font-medium border border-amber-200/60 inline-flex items-center gap-1"><i data-lucide="crown" class="w-3 h-3"></i> Liderar & Ajudar</span>`;
+                } else if(v.lead) {
+                    roleBadges = `<span class="bg-blue-100 text-blue-800 text-xs px-2.5 py-1 rounded-md font-medium border border-blue-200/60 inline-flex items-center gap-1"><i data-lucide="award" class="w-3 h-3"></i> Liderar</span>`;
+                } else if(v.help) {
+                    roleBadges = `<span class="bg-indigo-100 text-indigo-800 text-xs px-2.5 py-1 rounded-md font-medium border border-indigo-200/60 inline-flex items-center gap-1"><i data-lucide="heart" class="w-3 h-3"></i> Ajudar</span>`;
+                } else {
+                    roleBadges = `<span class="bg-slate-100 text-slate-600 text-xs px-2.5 py-1 rounded-md font-medium">Não especificado</span>`;
+                }
+
+                // Ministries Badges Preview
+                const minPreview = v.ministries.slice(0, 2).map(m => 
+                    `<span class="bg-slate-100 text-slate-700 border border-slate-200 text-xs px-2 py-0.5 rounded">${m}</span>`
+                ).join(' ');
+                
+                const extraCount = v.ministries.length > 2 ? `<span class="text-xs text-slate-400 font-medium">+${v.ministries.length - 2}</span>` : '';
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div class="font-semibold text-slate-900 cursor-pointer hover:text-iasd-blue transition-colors" onclick="openModal(${v.id})">
+                            ${v.name}
+                        </div>
+                        <div class="text-xs text-slate-400">${v.membership}</div>
+                    </td>
+                    <td class="px-6 py-4 text-slate-600 font-mono text-xs">
+                        ${v.phone}
+                    </td>
+                    <td class="px-6 py-4">
+                        ${roleBadges}
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex flex-wrap items-center gap-1">
+                            ${minPreview} ${extraCount}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="openModal(${v.id})" class="text-iasd-blue hover:text-iasd-dark font-semibold text-xs bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition-colors inline-flex items-center gap-1">
+                            <i data-lucide="eye" class="w-3.5 h-3.5"></i> Detalhes
+                        </button>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+
+            lucide.createIcons();
+            document.getElementById('showingCount').innerText = `Exibindo ${data.length} de ${volunteersData.length} registros`;
+        }
+
+        // Filter Logic
+        function filterData() {
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            const ministryVal = document.getElementById('ministryFilter').value;
+            const roleVal = document.getElementById('roleFilter').value;
+
+            const filtered = volunteersData.filter(v => {
+                const matchesSearch = v.name.toLowerCase().includes(searchVal) || v.phone.includes(searchVal);
+                const matchesMinistry = ministryVal === "" || v.ministries.includes(ministryVal);
+                
+                let matchesRole = true;
+                if (roleVal === "Liderar") {
+                    matchesRole = v.lead;
+                } else if (roleVal === "Ajudar") {
+                    matchesRole = v.help && !v.lead;
+                }
+
+                return matchesSearch && matchesMinistry && matchesRole;
+            });
+
+            renderTable(filtered);
+        }
+
+        // Modal Functionality
+        function openModal(id) {
+            const v = volunteersData.find(item => item.id === id);
+            if (!v) return;
+
+            document.getElementById('modalName').innerText = v.name;
+            document.getElementById('modalPhone').innerText = v.phone;
+            document.getElementById('modalMinCount').innerText = v.ministries.length;
+            
+            // Initials
+            const nameParts = v.name.split(' ');
+            const initials = nameParts.length > 1 ? (nameParts[0][0] + nameParts[nameParts.length - 1][0]).toUpperCase() : v.name.slice(0, 2).toUpperCase();
+            document.getElementById('modalInitials').innerText = initials;
+
+            // Roles Badges
+            const rolesContainer = document.getElementById('modalRoles');
+            rolesContainer.innerHTML = '';
+            
+            if(v.lead) {
+                rolesContainer.innerHTML += `<span class="bg-amber-100 text-amber-800 text-xs px-3 py-1.5 rounded-lg font-semibold border border-amber-200 flex items-center gap-1.5"><i data-lucide="crown" class="w-4 h-4"></i> Liderar Equipes</span>`;
+            }
+            if(v.help) {
+                rolesContainer.innerHTML += `<span class="bg-indigo-100 text-indigo-800 text-xs px-3 py-1.5 rounded-lg font-semibold border border-indigo-200 flex items-center gap-1.5"><i data-lucide="hand-heart" class="w-4 h-4"></i> Ajudar em Ministério</span>`;
+            }
+            if(!v.lead && !v.help) {
+                rolesContainer.innerHTML = `<span class="bg-slate-100 text-slate-600 text-xs px-3 py-1.5 rounded-lg font-medium">Nenhum perfil de liderança marcado</span>`;
+            }
+
+            // Ministries Badges
+            const minContainer = document.getElementById('modalMinistries');
+            minContainer.innerHTML = '';
+            v.ministries.forEach(m => {
+                minContainer.innerHTML += `<span class="bg-blue-50 text-iasd-blue border border-blue-200/80 text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm">${m}</span>`;
+            });
+
+            lucide.createIcons();
+            document.getElementById('volunteerModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('volunteerModal').classList.add('hidden');
+        }
+
+        // Charts Initialization
+        function initCharts() {
+            // Data Prep for Ministries Chart
+            const minCounts = {};
+            getUniqueMinistries().forEach(m => minCounts[m] = 0);
+            volunteersData.forEach(v => {
+                v.ministries.forEach(m => {
+                    if (minCounts[m] !== undefined) minCounts[m]++;
+                });
+            });
+
+            // Sort ministries by count
+            const sortedMinistries = Object.keys(minCounts).sort((a,b) => minCounts[b] - minCounts[a]);
+            const ministryDataValues = sortedMinistries.map(m => minCounts[m]);
+
+            // Bar Chart (Ministries)
+            const ctx1 = document.getElementById('ministryChart').getContext('2d');
+            ministryChart = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: sortedMinistries.map(m => m.replace('Ministério da ', 'M. ').replace('Ministério dos ', 'M. ')),
+                    datasets: [{
+                        label: 'Interessados',
+                        data: ministryDataValues,
+                        backgroundColor: '#004B87',
+                        hoverBackgroundColor: '#0066B3',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                title: (items) => sortedMinistries[items[0].dataIndex]
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { precision: 0 }
+                        },
+                        x: {
+                            ticks: {
+                                font: { size: 10 },
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Role Chart (Doughnut)
+            const both = volunteersData.filter(v => v.lead && v.help).length;
+            const onlyLead = volunteersData.filter(v => v.lead && !v.help).length;
+            const onlyHelp = volunteersData.filter(v => !v.lead && v.help).length;
+
+            const ctx2 = document.getElementById('roleChart').getContext('2d');
+            roleChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Liderar & Ajudar', 'Apenas Liderar', 'Apenas Ajudar'],
+                    datasets: [{
+                        data: [both, onlyLead, onlyHelp],
+                        backgroundColor: ['#F59E0B', '#004B87', '#818CF8'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // Export Functionality (CSV)
+        function exportToCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Nome,Celular,Membro,Liderar,Ajudar,Ministérios\n";
+
+            volunteersData.forEach(v => {
+                const ministriesStr = `"${v.ministries.join(', ')}"`;
+                const row = `"${v.name}","${v.phone}","${v.membership}",${v.lead ? 'Sim' : 'Não'},${v.help ? 'Sim' : 'Não'},${ministriesStr}`;
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "voluntarios_iasd_pds.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
